@@ -594,7 +594,7 @@ public class SearchActor extends SearchBaseActor {
                             String objectType = ((String) map.getOrDefault("objectType", "")).replaceAll("Image", "");
                             if(StringUtils.equalsIgnoreCase("Collection", objectType) || StringUtils.equalsIgnoreCase("Asset", objectType))
                                 map.replace("objectType", "Content");
-                            else
+                            else 
                                 map.replace("objectType", objectType);
                             if (StringUtils.isNotBlank(objectType)) {
                                 String key = getResultParamKey(objectType);

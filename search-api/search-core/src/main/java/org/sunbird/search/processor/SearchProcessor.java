@@ -112,7 +112,7 @@ public class SearchProcessor {
 	/**
 	 * Returns the list of words which are synonyms of the synsetIds passed in the
 	 * request
-	 * 
+	 *
 	 * @param synsetIds
 	 * @return
 	 * @throws Exception
@@ -367,84 +367,84 @@ public class SearchProcessor {
 
 			switch (opertation) {
 			case SearchConstants.SEARCH_OPERATION_EQUAL: {
-					queryBuilder = getMustTermQuery(propertyName, values, true);
-					queryBuilder = checkNestedProperty(queryBuilder, propertyName);
-					break;
-				}
+			queryBuilder = getMustTermQuery(propertyName, values, true);
+			queryBuilder = checkNestedProperty(queryBuilder, propertyName);
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_NOT_EQUAL: {
-					queryBuilder = getMustTermQuery(propertyName, values, false);
-					queryBuilder = checkNestedProperty(queryBuilder, propertyName);
-					break;
-				}
+			queryBuilder = getMustTermQuery(propertyName, values, false);
+			queryBuilder = checkNestedProperty(queryBuilder, propertyName);
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_NOT_IN: {
-					queryBuilder = getNotInQuery(propertyName, values);
-					queryBuilder = checkNestedProperty(queryBuilder, propertyName);
-					break;
-				}
+			queryBuilder = getNotInQuery(propertyName, values);
+			queryBuilder = checkNestedProperty(queryBuilder, propertyName);
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_ENDS_WITH: {
-					queryBuilder = getRegexQuery(propertyName, values);
-					queryBuilder = checkNestedProperty(queryBuilder, propertyName);
-					break;
-				}
+			queryBuilder = getRegexQuery(propertyName, values);
+			queryBuilder = checkNestedProperty(queryBuilder, propertyName);
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_LIKE:
 			case SearchConstants.SEARCH_OPERATION_CONTAINS: {
-					queryBuilder = getMatchPhraseQuery(propertyName, values, true);
-					queryBuilder = checkNestedProperty(queryBuilder, propertyName);
-					break;
-				}
+			queryBuilder = getMatchPhraseQuery(propertyName, values, true);
+			queryBuilder = checkNestedProperty(queryBuilder, propertyName);
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_NOT_LIKE: {
-					queryBuilder = getMatchPhraseQuery(propertyName, values, false);
-					queryBuilder = checkNestedProperty(queryBuilder, propertyName);
-					break;
-				}
+			queryBuilder = getMatchPhraseQuery(propertyName, values, false);
+			queryBuilder = checkNestedProperty(queryBuilder, propertyName);
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_STARTS_WITH: {
-					queryBuilder = getMatchPhrasePrefixQuery(propertyName, values);
-					queryBuilder = checkNestedProperty(queryBuilder, propertyName);
-					break;
-				}
+			queryBuilder = getMatchPhrasePrefixQuery(propertyName, values);
+			queryBuilder = checkNestedProperty(queryBuilder, propertyName);
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_EXISTS: {
-					queryBuilder = getExistsQuery(propertyName, values, true);
-					queryBuilder = checkNestedProperty(queryBuilder, propertyName);
-					break;
-				}
+			queryBuilder = getExistsQuery(propertyName, values, true);
+			queryBuilder = checkNestedProperty(queryBuilder, propertyName);
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_NOT_EXISTS: {
-					queryBuilder = getExistsQuery(propertyName, values, false);
-					queryBuilder = checkNestedProperty(queryBuilder, propertyName);
-					break;
-				}
+			queryBuilder = getExistsQuery(propertyName, values, false);
+			queryBuilder = checkNestedProperty(queryBuilder, propertyName);
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_GREATER_THAN: {
-					queryBuilder = getRangeQuery(propertyName, values,
-							SearchConstants.SEARCH_OPERATION_GREATER_THAN);
-					queryBuilder = checkNestedProperty(queryBuilder, propertyName);
-					break;
-				}
+			queryBuilder = getRangeQuery(propertyName, values,
+			SearchConstants.SEARCH_OPERATION_GREATER_THAN);
+			queryBuilder = checkNestedProperty(queryBuilder, propertyName);
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_GREATER_THAN_EQUALS: {
-					queryBuilder = getRangeQuery(propertyName, values,
-							SearchConstants.SEARCH_OPERATION_GREATER_THAN_EQUALS);
-					queryBuilder = checkNestedProperty(queryBuilder, propertyName);
-					break;
-				}
+			queryBuilder = getRangeQuery(propertyName, values,
+					SearchConstants.SEARCH_OPERATION_GREATER_THAN_EQUALS);
+			queryBuilder = checkNestedProperty(queryBuilder, propertyName);
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_LESS_THAN: {
-					queryBuilder = getRangeQuery(propertyName, values, SearchConstants.SEARCH_OPERATION_LESS_THAN);
-					queryBuilder = checkNestedProperty(queryBuilder, propertyName);
-					break;
-				}
+			queryBuilder = getRangeQuery(propertyName, values, SearchConstants.SEARCH_OPERATION_LESS_THAN);
+			queryBuilder = checkNestedProperty(queryBuilder, propertyName);
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_LESS_THAN_EQUALS: {
-					queryBuilder = getRangeQuery(propertyName, values,
-							SearchConstants.SEARCH_OPERATION_LESS_THAN_EQUALS);
-					queryBuilder = checkNestedProperty(queryBuilder, propertyName);
-					break;
+			queryBuilder = getRangeQuery(propertyName, values,
+			SearchConstants.SEARCH_OPERATION_LESS_THAN_EQUALS);
+			queryBuilder = checkNestedProperty(queryBuilder, propertyName);
+			break;
 				}
 			case SearchConstants.SEARCH_OPERATION_RANGE: {
-					queryBuilder = getRangeQuery(propertyName, values);
-					queryBuilder = checkNestedProperty(queryBuilder, propertyName);
-					break;
-				}
+			queryBuilder = getRangeQuery(propertyName, values);
+			queryBuilder = checkNestedProperty(queryBuilder, propertyName);
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_AND: {
-					queryBuilder = getAndQuery(propertyName, values);
-					queryBuilder = checkNestedProperty(queryBuilder, propertyName);
-					break;
-				}
+			queryBuilder = getAndQuery(propertyName, values);
+			queryBuilder = checkNestedProperty(queryBuilder, propertyName);
+			break;
+		}
 			}
 			if (operation.equalsIgnoreCase(AND)) {
 				boolQuery.must(queryBuilder);
@@ -502,89 +502,89 @@ public class SearchProcessor {
 			float weight = getweight(querySearchFeilds, propertyName);
 			switch (opertation) {
 			case SearchConstants.SEARCH_OPERATION_EQUAL: {
-					filterFunctionBuilder.add(new FilterFunctionBuilder(
-									getMustTermQuery(propertyName, values, true),
-									ScoreFunctionBuilders.weightFactorFunction(weight)));
-					break;
-				}
+			filterFunctionBuilder.add(new FilterFunctionBuilder(
+			getMustTermQuery(propertyName, values, true),
+			ScoreFunctionBuilders.weightFactorFunction(weight)));
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_NOT_EQUAL: {
-					filterFunctionBuilder.add(new FilterFunctionBuilder(
-									getMustTermQuery(propertyName, values, true),
-									ScoreFunctionBuilders.weightFactorFunction(weight)));
-					break;
-				}
+			filterFunctionBuilder.add(new FilterFunctionBuilder(
+			getMustTermQuery(propertyName, values, true),
+			ScoreFunctionBuilders.weightFactorFunction(weight)));
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_ENDS_WITH: {
-					filterFunctionBuilder.add(new FilterFunctionBuilder(
-									getRegexQuery(propertyName, values), ScoreFunctionBuilders.weightFactorFunction(weight)));
-					break;
-				}
+			filterFunctionBuilder.add(new FilterFunctionBuilder(
+			getRegexQuery(propertyName, values), ScoreFunctionBuilders.weightFactorFunction(weight)));
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_LIKE:
 			case SearchConstants.SEARCH_OPERATION_CONTAINS: {
-					filterFunctionBuilder.add(new FilterFunctionBuilder(
-									getMatchPhraseQuery(propertyName, values, true),
-									ScoreFunctionBuilders.weightFactorFunction(weight)));
-					break;
-				}
+			filterFunctionBuilder.add(new FilterFunctionBuilder(
+			getMatchPhraseQuery(propertyName, values, true),
+			ScoreFunctionBuilders.weightFactorFunction(weight)));
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_NOT_LIKE: {
-					filterFunctionBuilder.add(new FilterFunctionBuilder(
-									getMatchPhraseQuery(propertyName, values, false),
-									ScoreFunctionBuilders.weightFactorFunction(weight)));
-					break;
-				}
+			filterFunctionBuilder.add(new FilterFunctionBuilder(
+			getMatchPhraseQuery(propertyName, values, false),
+			ScoreFunctionBuilders.weightFactorFunction(weight)));
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_STARTS_WITH: {
-					filterFunctionBuilder.add(new FilterFunctionBuilder(
-									getMatchPhrasePrefixQuery(propertyName, values),
-									ScoreFunctionBuilders.weightFactorFunction(weight)));
-					break;
-				}
+			filterFunctionBuilder.add(new FilterFunctionBuilder(
+			getMatchPhrasePrefixQuery(propertyName, values),
+			ScoreFunctionBuilders.weightFactorFunction(weight)));
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_EXISTS: {
-					filterFunctionBuilder.add(
-									new FilterFunctionBuilder(getExistsQuery(propertyName, values, true),
-													ScoreFunctionBuilders.weightFactorFunction(weight)));
-					break;
-				}
+			filterFunctionBuilder.add(
+			new FilterFunctionBuilder(getExistsQuery(propertyName, values, true),
+			ScoreFunctionBuilders.weightFactorFunction(weight)));
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_NOT_EXISTS: {
-					filterFunctionBuilder.add(
-									new FilterFunctionBuilder(getExistsQuery(propertyName, values, false),
-												ScoreFunctionBuilders.weightFactorFunction(weight)));
-					break;
-				}
+			filterFunctionBuilder.add(
+			new FilterFunctionBuilder(getExistsQuery(propertyName, values, false),
+			ScoreFunctionBuilders.weightFactorFunction(weight)));
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_NOT_IN: {
-					filterFunctionBuilder.add(new FilterFunctionBuilder(
-									getNotInQuery(propertyName, values), ScoreFunctionBuilders.weightFactorFunction(weight)));
-					break;
-				}
-				case SearchConstants.SEARCH_OPERATION_GREATER_THAN: {
-					filterFunctionBuilder.add(new FilterFunctionBuilder(
-									getRangeQuery(propertyName, values, SearchConstants.SEARCH_OPERATION_GREATER_THAN),
-									ScoreFunctionBuilders.weightFactorFunction(weight)));
-					break;
-				}
-				case SearchConstants.SEARCH_OPERATION_GREATER_THAN_EQUALS: {
-					filterFunctionBuilder.add(new FilterFunctionBuilder(
-									getRangeQuery(propertyName, values,
-													SearchConstants.SEARCH_OPERATION_GREATER_THAN_EQUALS),
-									ScoreFunctionBuilders.weightFactorFunction(weight)));
-					break;
-				}
-				case SearchConstants.SEARCH_OPERATION_LESS_THAN: {
-					filterFunctionBuilder.add(new FilterFunctionBuilder(
-									getRangeQuery(propertyName, values, SearchConstants.SEARCH_OPERATION_LESS_THAN),
-									ScoreFunctionBuilders.weightFactorFunction(weight)));
-					break;
-				}
-				case SearchConstants.SEARCH_OPERATION_LESS_THAN_EQUALS: {
-					filterFunctionBuilder.add(new FilterFunctionBuilder(
-									getRangeQuery(propertyName, values, SearchConstants.SEARCH_OPERATION_LESS_THAN_EQUALS),
-									ScoreFunctionBuilders.weightFactorFunction(weight)));
-					break;
-				}
-				case SearchConstants.SEARCH_OPERATION_AND: {
-					filterFunctionBuilder.add(new FilterFunctionBuilder(
-									getAndQuery(propertyName, values),
-									ScoreFunctionBuilders.weightFactorFunction(weight)));
-					break;
-				}
+			filterFunctionBuilder.add(new FilterFunctionBuilder(
+			getNotInQuery(propertyName, values), ScoreFunctionBuilders.weightFactorFunction(weight)));
+			break;
+		}
+			case SearchConstants.SEARCH_OPERATION_GREATER_THAN: {
+			filterFunctionBuilder.add(new FilterFunctionBuilder(
+			getRangeQuery(propertyName, values, SearchConstants.SEARCH_OPERATION_GREATER_THAN),
+			ScoreFunctionBuilders.weightFactorFunction(weight)));
+			break;
+		}
+			case SearchConstants.SEARCH_OPERATION_GREATER_THAN_EQUALS: {
+			filterFunctionBuilder.add(new FilterFunctionBuilder(
+			getRangeQuery(propertyName, values,
+			SearchConstants.SEARCH_OPERATION_GREATER_THAN_EQUALS),
+			ScoreFunctionBuilders.weightFactorFunction(weight)));
+			break;
+		}
+			case SearchConstants.SEARCH_OPERATION_LESS_THAN: {
+			filterFunctionBuilder.add(new FilterFunctionBuilder(
+			getRangeQuery(propertyName, values, SearchConstants.SEARCH_OPERATION_LESS_THAN),
+			ScoreFunctionBuilders.weightFactorFunction(weight)));
+			break;
+		}
+			case SearchConstants.SEARCH_OPERATION_LESS_THAN_EQUALS: {
+			filterFunctionBuilder.add(new FilterFunctionBuilder(
+			getRangeQuery(propertyName, values, SearchConstants.SEARCH_OPERATION_LESS_THAN_EQUALS),
+			ScoreFunctionBuilders.weightFactorFunction(weight)));
+			break;
+		}
+			case SearchConstants.SEARCH_OPERATION_AND: {
+			filterFunctionBuilder.add(new FilterFunctionBuilder(
+			getAndQuery(propertyName, values),
+			ScoreFunctionBuilders.weightFactorFunction(weight)));
+			break;
+		}
 			}
 		}
 
@@ -599,8 +599,8 @@ public class SearchProcessor {
 	private QueryBuilder getAndQuery(String propertyName, List<Object> values) {
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		for (Object value : values) {
-						queryBuilder.must(
-										QueryBuilders.matchQuery(propertyName, value).operator(Operator.AND));
+		queryBuilder.must(
+		QueryBuilders.matchQuery(propertyName, value).operator(Operator.AND));
 		}
 		return queryBuilder;
 	}
@@ -682,25 +682,25 @@ public class SearchProcessor {
 		for (Object value : values) {
 			switch (operation) {
 			case SearchConstants.SEARCH_OPERATION_GREATER_THAN: {
-					queryBuilder.should(QueryBuilders
-									.rangeQuery(propertyName).gt(value));
-					break;
-				}
+			queryBuilder.should(QueryBuilders
+			.rangeQuery(propertyName).gt(value));
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_GREATER_THAN_EQUALS: {
-					queryBuilder.should(QueryBuilders
-									.rangeQuery(propertyName).gte(value));
-					break;
-				}
+			queryBuilder.should(QueryBuilders
+			.rangeQuery(propertyName).gte(value));
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_LESS_THAN: {
-					queryBuilder.should(QueryBuilders
-									.rangeQuery(propertyName).lt(value));
-					break;
-				}
+			queryBuilder.should(QueryBuilders
+			.rangeQuery(propertyName).lt(value));
+			break;
+		}
 			case SearchConstants.SEARCH_OPERATION_LESS_THAN_EQUALS: {
-					queryBuilder.should(QueryBuilders
-									.rangeQuery(propertyName).lte(value));
-					break;
-				}
+			queryBuilder.should(QueryBuilders
+			.rangeQuery(propertyName).lte(value));
+			break;
+		}
 			}
 		}
 
@@ -823,13 +823,13 @@ public class SearchProcessor {
 				for (String key : rangeMap.keySet()) {
 					switch (key) {
 					case SearchConstants.SEARCH_OPERATION_RANGE_GTE: {
-							queryBuilder.from(rangeMap.get(key));
-							break;
-						}
+					queryBuilder.from(rangeMap.get(key));
+					break;
+				}
 					case SearchConstants.SEARCH_OPERATION_RANGE_LTE: {
-							queryBuilder.to(rangeMap.get(key));
-							break;
-						}
+					queryBuilder.to(rangeMap.get(key));
+					break;
+				}
 					}
 				}
 			}
@@ -851,7 +851,7 @@ public class SearchProcessor {
 	}
 
 	public Future<List<Object>> processSearchQuery(SearchDTO searchDTO, boolean includeResults, String index,
-					boolean sort)
+	boolean sort)
 			throws Exception {
 		List<Map<String, Object>> groupByFinalList = new ArrayList<Map<String, Object>>();
 		if (searchDTO.getLimit() == 0)
@@ -877,8 +877,8 @@ public class SearchProcessor {
 	}
 
 	public Future<SearchResponse> processSearchQueryWithSearchResult(SearchDTO searchDTO, boolean includeResults,
-					String index,
-					boolean sort) throws Exception {
+	String index,
+	boolean sort) throws Exception {
 		List<Map<String, Object>> groupByFinalList = new ArrayList<Map<String, Object>>();
 		if (searchDTO.getLimit() == 0)
 			searchDTO.setLimit(ElasticSearchUtil.defaultResultLimit);
@@ -916,9 +916,9 @@ public class SearchProcessor {
 		}
 	}
 
-private List<Map<String,Object>> aggregateResult(Aggregations aggregations) {
-	List<Map<String, Object>> aggregationList = new ArrayList<>();
-	if(null != aggregations){
+	private List<Map<String,Object>> aggregateResult(Aggregations aggregations) {
+		List<Map<String, Object>> aggregationList = new ArrayList<>();
+		if(null != aggregations){
 		Map<String, Aggregation> aggregationMap = aggregations.getAsMap();
 		for(String key: aggregationMap.keySet()){
 			Terms terms = (Terms) aggregationMap.get(key);
