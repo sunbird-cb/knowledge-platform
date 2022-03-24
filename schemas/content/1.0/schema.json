@@ -87,7 +87,8 @@
                 "audio/webm",
                 "audio/x-wav",
                 "audio/wav",
-                "application/json"
+                "application/json",
+                "application/quiz"
             ]
         },
         "osId": {
@@ -1054,6 +1055,9 @@
         "organisationId" : {
             "type": "string"
         },
+        "programId": {
+            "type": "string"
+        },
         "itemSetPreviewUrl": {
             "type": "string"
         },
@@ -1176,12 +1180,12 @@
         "cloudStorageKey": {
             "type": "string"
         },
-      "batches": {
-        "type": "array",
-        "items": {
-          "type": "object"
-        }
-      },
+        "batches": {
+            "type": "array",
+            "items": {
+                "type": "object"
+            }
+        },
         "year": {
             "type": "string"
         },
@@ -1384,17 +1388,17 @@
                 "type": "string"
             }
         },
-        "transcripts": {
-          "type": "array",
+        "taxonomyPaths_v2": {
+            "type": "array",
             "items": {
-              "type": "object"
+                "type": "object"
             }
         },
-        "accessibility": {
-          "type": "array",
-          "items": {
-              "type": "object"
-          }
+        "competencies_v3": {
+            "type": "array",
+            "items": {
+                "type": "object"
+            }
         }
     }
 }

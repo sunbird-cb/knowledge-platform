@@ -57,8 +57,8 @@
       ]
     },
     "osId": {
-        "type": "string",
-        "default": "org.ekstep.launcher"
+      "type": "string",
+      "default": "org.ekstep.launcher"
     },
     "contentEncoding": {
       "type": "string",
@@ -168,7 +168,7 @@
     "contentCredits": {
       "type": "array",
       "items": {
-          "type": "object"
+        "type": "object"
       }
     },
     "appIcon": {
@@ -1043,16 +1043,16 @@
       "type": "object",
       "properties":
       {
-          "enabled":
-          {
-              "type": "string",
-              "enum": ["Yes", "No"],
-              "default": "No"
-          }
+        "enabled":
+        {
+          "type": "string",
+          "enum": ["Yes", "No"],
+          "default": "No"
+        }
       },
       "default":
       {
-          "enabled": "No"
+        "enabled": "No"
       },
       "additionalProperties": false
     },
@@ -1281,10 +1281,16 @@
       ],
       "default": "No"
     },
-    "accessibility": {
+    "taxonomyPaths_v2": {
       "type": "array",
       "items": {
-          "type": "object"
+        "type": "object"
+      }
+    },
+    "competencies_v3": {
+      "type": "array",
+      "items": {
+        "type": "object"
       }
     }
   }
