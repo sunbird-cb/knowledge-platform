@@ -126,7 +126,7 @@ abstract class BaseController(protected val cc: ControllerComponents)(implicit e
                 }
             }
         } else if ((StringUtils.isNotBlank(contentType) && StringUtils.equalsIgnoreCase(contentType, Constants.ASSET_CONTENT_TYPE))
-          || (StringUtils.isNotBlank(primaryCategory) && StringUtils.equalsIgnoreCase(primaryCategory, Constants.ASSET_CONTENT_TYPE))) {
+            || (StringUtils.isNotBlank(primaryCategory) && StringUtils.equalsIgnoreCase(primaryCategory, Constants.ASSET_CONTENT_TYPE))) {
             request.setObjectType(Constants.ASSET_OBJECT_TYPE)
             new java.util.HashMap[String, AnyRef]() {
                 {
@@ -155,16 +155,16 @@ abstract class BaseController(protected val cc: ControllerComponents)(implicit e
     private def setContentAndCategoryTypes(input: java.util.Map[String, AnyRef]): Unit = {
         val contentType = input.get("contentType").asInstanceOf[String]
         val primaryCategory = input.get("primaryCategory").asInstanceOf[String]
-        val (updatedContentType, updatedPrimaryCategory): (String, String) = (contentType, primaryCategory) match {
-            case (x: String, y: String) => (x, y)
-            case ("Resource", y) => (contentType, getCategoryForResource(input.getOrDefault("mimeType", "").asInstanceOf[String],
-                input.getOrDefault("resourceType", "").asInstanceOf[String]))
-            case (x: String, y) => (x, getPrimaryCategory(x))
-            case (x, y: String) => (getContentType(y), y)
-            case _ => (contentType, primaryCategory)
-        }
-        input.put("contentType", if (StringUtils.isBlank(updatedContentType)) "Resource" else updatedContentType)
-        input.put("primaryCategory", updatedPrimaryCategory)
+            val (updatedContentType, updatedPrimaryCategory): (String, String) = (contentType, primaryCategory) match {
+                case (x: String, y: String) => (x, y)
+                case ("Resource", y) => (contentType, getCategoryForResource(input.getOrDefault("mimeType", "").asInstanceOf[String],
+                    input.getOrDefault("resourceType", "").asInstanceOf[String]))
+                case (x: String, y) => (x, getPrimaryCategory(x))
+                case (x, y: String) => (getContentType(y), y)
+                case _ => (contentType, primaryCategory)
+            }
+            input.put("contentType", if (StringUtils.isBlank(updatedContentType)) "Resource" else updatedContentType)
+            input.put("primaryCategory", updatedPrimaryCategory)
     }
 
     private def getPrimaryCategory(contentType: String): String ={
