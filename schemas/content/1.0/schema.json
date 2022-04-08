@@ -1389,24 +1389,24 @@
           "type": "array",
             "items": {
                 "type": "string"
-            },
-            "taxonomyPaths_v2": {
-                "type": "array",
-                "items": {
-                    "type": "object"
-                }
-            },
-            "accessibility": {
-                "type": "array",
-                "items": {
-                    "type": "object"
-                }
-            },
-            "competencies_v3": {
-                "type": "array",
-                "items": {
-                    "type": "object"
-                }
+            }
+        },
+        "accessibility": {
+            "type": "array",
+            "items": {
+                "type": "object"
+            }
+        },
+        "taxonomyPaths_v2": {
+            "type": "array",
+            "items": {
+                "type": "object"
+            }
+        },
+        "competencies_v3": {
+            "type": "array",
+            "items": {
+                "type": "object"
             }
         }
     }
