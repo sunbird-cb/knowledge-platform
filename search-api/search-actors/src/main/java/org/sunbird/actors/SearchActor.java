@@ -236,13 +236,13 @@ public class SearchActor extends SearchBaseActor {
             // Changing fields to null so that search all fields but returns
             // only the fields specified
             properties.addAll(getSearchQueryProperties(queryString, null));
-            properties.addAll(getSearchFilterProperties(filters, wordChainsRequest, request));
+            properties.addAll(getSearchFilterProperties(filters, wordChainsRequest, request, true));
             searchObj.setSortBy(sortBy);
             searchObj.setFacets(facets);
             searchObj.setProperties(properties);
             if (multiFilters != null) {
                 List<Map> multiFilterProperties = new ArrayList<Map>();
-                multiFilterProperties.addAll(getSearchFilterProperties(multiFilters, wordChainsRequest, request));
+                multiFilterProperties.addAll(getSearchFilterProperties(multiFilters, wordChainsRequest, request, false));
                 searchObj.setMultiFilterProperties(multiFilterProperties);
             }
             // Added Implicit Filter Properties To Support Collection content tagging to reuse by tenants.
@@ -372,7 +372,7 @@ public class SearchActor extends SearchBaseActor {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private List<Map<String, Object>> getSearchFilterProperties(Map<String, Object> filters, Boolean traversal, Request request)
+    private List<Map<String, Object>> getSearchFilterProperties(Map<String, Object> filters, Boolean traversal, Request request, Boolean defaultProperty)
             throws Exception {
         List<Map<String, Object>> properties = new ArrayList<Map<String, Object>>();
         if (null == filters) filters = new HashMap<String, Object>();
@@ -516,7 +516,7 @@ public class SearchActor extends SearchBaseActor {
             }
         }
 
-        if (!filters.containsKey("status") && !traversal) {
+        if (defaultProperty && !filters.containsKey("status") && !traversal) {
             Map<String, Object> property = getFilterProperty("status", SearchConstants.SEARCH_OPERATION_EQUAL, Arrays.asList(new String[] { "Live" }));
             properties.add(property);
         }
@@ -773,7 +773,7 @@ public class SearchActor extends SearchBaseActor {
                 }
             }
             List<Map> implicitFilterProps = new ArrayList<Map>();
-            implicitFilterProps.addAll(getSearchFilterProperties(implicitFilter, false, null));
+            implicitFilterProps.addAll(getSearchFilterProperties(implicitFilter, false, null, true));
             searchObj.setImplicitFilterProperties(implicitFilterProps);
         }
     }

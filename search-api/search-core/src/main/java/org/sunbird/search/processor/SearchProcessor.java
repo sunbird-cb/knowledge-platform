@@ -329,7 +329,9 @@ public class SearchProcessor {
 		List<Map> properties = searchDTO.getProperties();
 		formQuery(properties, queryBuilder, boolQuery, totalOperation);
 		if(searchDTO.getMultiFilterProperties() != null) {
-			formQuery(searchDTO.getMultiFilterProperties(), queryBuilder, boolQuery, SearchConstants.SEARCH_OPERATION_OR);
+			BoolQueryBuilder multiFilterBoolQuery = new BoolQueryBuilder();
+			formQuery(searchDTO.getMultiFilterProperties(), queryBuilder, multiFilterBoolQuery, SearchConstants.SEARCH_OPERATION_OR);
+			boolQuery.must(multiFilterBoolQuery);
 		}
 
 		Map<String, Object> softConstraints = searchDTO.getSoftConstraints();
