@@ -11,14 +11,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.util.EntityUtils;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.support.master.AcknowledgedResponse;
-import org.elasticsearch.client.*;
+import org.elasticsearch.client.RestClientBuilder;
 import org.sunbird.search.util.SearchConstants;
 import org.sunbird.telemetry.logger.TelemetryManager;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
@@ -34,6 +34,9 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -46,6 +49,7 @@ import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.sunbird.common.Platform;
 import org.sunbird.common.exception.ServerException;
@@ -67,6 +71,8 @@ import java.util.stream.Collectors;
  *
  */
 public class ElasticSearchUtil {
+	private static String documentId;
+
 	static {
 		System.setProperty("es.set.netty.runtime.available.processors", "false");
 		registerShutdownHook();
@@ -148,7 +154,7 @@ public class ElasticSearchUtil {
 	public static boolean isIndexExists(String indexName) {
 		Response response;
 		try {
-			response = getClient(indexName).getLowLevelClient().performRequest(new Request("HEAD", "/" + indexName));
+			response = getClient(indexName).getLowLevelClient().performRequest("HEAD", "/" + indexName);
 			return (200 == response.getStatusLine().getStatusCode());
 		} catch (IOException e) {
 			return false;
@@ -167,18 +173,19 @@ public class ElasticSearchUtil {
 				createRequest.settings(Settings.builder().loadFromSource(settings, XContentType.JSON));
 			if (StringUtils.isNotBlank(documentType) && StringUtils.isNotBlank(mappings))
 				createRequest.mapping(documentType, mappings, XContentType.JSON);
-			CreateIndexResponse createIndexResponse = client.indices().create(createRequest, RequestOptions.DEFAULT);
+			CreateIndexResponse createIndexResponse = client.indices().create(createRequest);
 
 			response = createIndexResponse.isAcknowledged();
 		}
 		return response;
 	}
 
+
 	public static void addDocumentWithId(String indexName, String documentType, String documentId, String document) {
 		try {
 			Map<String, Object> doc = mapper.readValue(document, new TypeReference<Map<String, Object>>() {});
 			Map<String, Object> updatedDoc = checkDocStringLength(doc);
-			IndexResponse response = getClient(indexName).index(new IndexRequest(indexName, documentType, documentId).source(updatedDoc), RequestOptions.DEFAULT);
+			IndexResponse response = getClient(indexName).index(new IndexRequest(indexName, documentType, documentId).source(updatedDoc));
 			TelemetryManager.log("Added " + response.getId() + " to index " + response.getIndex());
 		} catch (IOException e) {
 			TelemetryManager.error("Error while adding document to index :" + indexName, e);
@@ -189,7 +196,7 @@ public class ElasticSearchUtil {
 		try {
 			Map<String, Object> doc = mapper.readValue(document, new TypeReference<Map<String, Object>>() {});
 			Map<String, Object> updatedDoc = checkDocStringLength(doc);
-			IndexResponse response = getClient(indexName).index(new IndexRequest(indexName, documentType).source(updatedDoc), RequestOptions.DEFAULT);
+			IndexResponse response = getClient(indexName).index(new IndexRequest(indexName, documentType, documentId).source(updatedDoc));
 			TelemetryManager.log("Added " + response.getId() + " to index " + response.getIndex());
 		} catch (IOException e) {
 			TelemetryManager.error("Error while adding document to index :" + indexName, e);
@@ -203,7 +210,7 @@ public class ElasticSearchUtil {
 			Map<String, Object> updatedDoc = checkDocStringLength(doc);
 			IndexRequest indexRequest = new IndexRequest(indexName, documentType, documentId).source(updatedDoc);
 			UpdateRequest request = new UpdateRequest().index(indexName).type(documentType).id(documentId).doc(updatedDoc).upsert(indexRequest);
-			UpdateResponse response = getClient(indexName).update(request, RequestOptions.DEFAULT);
+			UpdateResponse response = getClient(indexName).update(request);
 			TelemetryManager.log("Updated " + response.getId() + " to index " + response.getIndex());
 		} catch (IOException e) {
 			TelemetryManager.error("Error while updating document to index :" + indexName, e);
@@ -213,27 +220,27 @@ public class ElasticSearchUtil {
 
 	public static void deleteDocument(String indexName, String documentType, String documentId)
 			throws IOException {
-		DeleteResponse response = getClient(indexName).delete(new DeleteRequest(indexName, documentType, documentId), RequestOptions.DEFAULT);
+		DeleteResponse response = getClient(indexName).delete(new DeleteRequest(indexName, documentType, documentId));
 		TelemetryManager.log("Deleted " + response.getId() + " to index " + response.getIndex());
 	}
 
 	public static void deleteDocumentsByQuery(QueryBuilder query, String indexName, String indexType)
 			throws IOException {
-		Response response = getClient(indexName).getLowLevelClient().performRequest(new Request("POST",
-				indexName + "/_delete_by_query" + query));
+		Response response = getClient(indexName).getLowLevelClient().performRequest("POST",
+				indexName + "/_delete_by_query" + query);
 
 		TelemetryManager.log("Deleted Documents by Query" + EntityUtils.toString(response.getEntity()));
 	}
 
-	public static void deleteIndex(String indexName) throws IOException {
-		AcknowledgedResponse response = getClient(indexName).indices().delete(new DeleteIndexRequest(indexName), RequestOptions.DEFAULT);
+	public static void deleteIndex(String indexName) throws InterruptedException, ExecutionException, IOException {
+		DeleteIndexResponse response = getClient(indexName).indices().delete(new DeleteIndexRequest(indexName));
 		esClient.remove(indexName);
 		TelemetryManager.log("Deleted Index" + indexName + " : " + response.isAcknowledged());
 	}
 
 	public static String getDocumentAsStringById(String indexName, String documentType, String documentId)
 			throws IOException {
-		GetResponse response = getClient(indexName).get(new GetRequest(indexName, documentType, documentId), RequestOptions.DEFAULT);
+		GetResponse response = getClient(indexName).get(new GetRequest(indexName, documentType, documentId));
 		return response.getSourceAsString();
 	}
 
@@ -242,7 +249,7 @@ public class ElasticSearchUtil {
 		List<String> finalResult = new ArrayList<String>();
 		MultiGetRequest request = new MultiGetRequest();
 		documentIdList.forEach(docId -> request.add(indexName, documentType, docId));
-		MultiGetResponse multiGetItemResponses = getClient(indexName).mget(request, RequestOptions.DEFAULT);
+		MultiGetResponse multiGetItemResponses = getClient(indexName).multiGet(request);
 		for (MultiGetItemResponse itemResponse : multiGetItemResponses) {
 			GetResponse response = itemResponse.getResponse();
 			if (response.isExists()) {
@@ -265,7 +272,7 @@ public class ElasticSearchUtil {
 					request.add(new IndexRequest(indexName, documentType, key)
 							.source((Map<String, Object>) jsonObjects.get(key)));
 					if (count % BATCH_SIZE == 0 || (count % BATCH_SIZE < BATCH_SIZE && count == jsonObjects.size())) {
-						BulkResponse bulkResponse = client.bulk(request, RequestOptions.DEFAULT);
+						BulkResponse bulkResponse = client.bulk(request);
 						if (bulkResponse.hasFailures()) {
 							TelemetryManager
 									.log("Failures in Elasticsearch bulkIndex : " + bulkResponse.buildFailureMessage());
@@ -290,7 +297,7 @@ public class ElasticSearchUtil {
 					count++;
 					request.add(new IndexRequest(indexName, documentType).source(json));
 					if (count % BATCH_SIZE == 0 || (count % BATCH_SIZE < BATCH_SIZE && count == jsonObjects.size())) {
-						BulkResponse bulkResponse = client.bulk(request, RequestOptions.DEFAULT);
+						BulkResponse bulkResponse = client.bulk(request);
 						if (bulkResponse.hasFailures()) {
 							TelemetryManager
 									.log("Failures in Elasticsearch bulkIndex : " + bulkResponse.buildFailureMessage());
@@ -432,7 +439,7 @@ public class ElasticSearchUtil {
 
 	public static SearchResponse search(String indexName, String indexType, SearchSourceBuilder query)
 			throws Exception {
-		return getClient(indexName).search(new SearchRequest(indexName).source(query), RequestOptions.DEFAULT);
+		return getClient(indexName).search(new SearchRequest(indexName).source(query));
 	}
 
 	public static Future<SearchResponse> search(String indexName, SearchSourceBuilder searchSourceBuilder)
@@ -440,7 +447,7 @@ public class ElasticSearchUtil {
 		TelemetryManager.log("searching in ES index: " + indexName);
 		Promise<SearchResponse> promise = Futures.promise();
 		getClient(indexName).searchAsync(new SearchRequest().indices(indexName).source(searchSourceBuilder),
-				RequestOptions.DEFAULT, new ActionListener<SearchResponse>() {
+				new ActionListener<SearchResponse>() {
 
 					@Override
 					public void onResponse(SearchResponse response) {
@@ -457,7 +464,7 @@ public class ElasticSearchUtil {
 
 	public static int count(String indexName, SearchSourceBuilder searchSourceBuilder) throws IOException {
 		SearchResponse response = getClient(indexName)
-				.search(new SearchRequest().indices(indexName).source(searchSourceBuilder), RequestOptions.DEFAULT);
+				.search(new SearchRequest().indices(indexName).source(searchSourceBuilder));
 		return (int) response.getHits().getTotalHits();
 
 	}
@@ -606,46 +613,52 @@ public class ElasticSearchUtil {
 		return new SearchSourceBuilder().query(QueryBuilders.wildcardQuery(textKeyWord, wordWildCard));
 
 	}
-
 	@SuppressWarnings("unchecked")
 	public static Object getCountFromAggregation(Aggregations aggregations, List<Map<String, Object>> groupByList,
 												 IESResultTransformer transformer) {
-
-		Map<String, Object> countMap = new HashMap<String, Object>();
+	Map<String, Object> countMap = new HashMap<String, Object>();
 		if (aggregations != null) {
-			for (Map<String, Object> aggregationsMap : groupByList) {
-				Map<String, Object> parentCountMap = new HashMap<String, Object>();
-				String groupByParent = (String) aggregationsMap.get("groupByParent");
-				Terms terms = aggregations.get(groupByParent);
-				List<Map<String, Object>> parentGroupList = new ArrayList<Map<String, Object>>();
-				List<Bucket> buckets = (List<Bucket>) terms.getBuckets();
-				for (Bucket bucket : buckets) {
-					Map<String, Object> parentCountObject = new HashMap<String, Object>();
-					parentCountObject.put("count", bucket.getDocCount());
-					List<String> groupByChildList = (List<String>) aggregationsMap.get("groupByChildList");
-					Aggregations subAggregations = bucket.getAggregations();
-					if (null != groupByChildList && !groupByChildList.isEmpty() && null != subAggregations) {
-						Map<String, Object> groupByChildMap = new HashMap<String, Object>();
-						for (String groupByChild : groupByChildList) {
-							Terms subTerms = subAggregations.get(groupByChild);
-							List<Bucket> childBuckets = (List<Bucket>) subTerms.getBuckets();
-							Map<String, Long> childCountMap = new HashMap<String, Long>();
-							for (Bucket childBucket : childBuckets) {
-								childCountMap.put(childBucket.getKeyAsString(), childBucket.getDocCount());
-								groupByChildMap.put(groupByChild, childCountMap);
-							}
-						}
-						parentCountObject.putAll(groupByChildMap);
-					}
-					parentCountMap.put(bucket.getKeyAsString(), parentCountObject);
-					parentGroupList.add(parentCountMap);
-				}
-
-				countMap.put(groupByParent, parentCountMap);
+		for (Map<String, Object> aggregationsMap : groupByList) {
+			Map<String, Object> parentCountMap = new HashMap<String, Object>();
+			String groupByParent = (String) aggregationsMap.get("groupByParent");
+			Terms terms = null;
+			List<Bucket> buckets = null;
+			if (groupByParent.contains(".")) {
+				Nested nested = aggregations.get(groupByParent.split("\\.")[0]);
+				terms = nested.getAggregations().get(groupByParent.split("\\.")[1]);
+			} else {
+				terms = aggregations.get(groupByParent);
 			}
+			buckets = (List<Bucket>)terms.getBuckets();
+			List<Map<String, Object>> parentGroupList = new ArrayList<Map<String, Object>>();
+			for (Bucket bucket : buckets) {
+				Map<String, Object> parentCountObject = new HashMap<String, Object>();
+				parentCountObject.put("count", bucket.getDocCount());
+				List<String> groupByChildList = (List<String>) aggregationsMap.get("groupByChildList");
+				Aggregations subAggregations = bucket.getAggregations();
+				if (null != groupByChildList && !groupByChildList.isEmpty() && null != subAggregations) {
+					Map<String, Object> groupByChildMap = new HashMap<String, Object>();
+					for (String groupByChild : groupByChildList) {
+						Terms subTerms = subAggregations.get(groupByChild);
+						List<Bucket> childBuckets = (List<Bucket>) subTerms.getBuckets();
+						Map<String, Long> childCountMap = new HashMap<String, Long>();
+						for (Bucket childBucket : childBuckets) {
+							childCountMap.put(childBucket.getKeyAsString(), childBucket.getDocCount());
+							groupByChildMap.put(groupByChild, childCountMap);
+						}
+					}
+					parentCountObject.putAll(groupByChildMap);
+				}
+				parentCountMap.put(bucket.getKeyAsString(), parentCountObject);
+				parentGroupList.add(parentCountMap);
+			}
+
+			countMap.put(groupByParent, parentCountMap);
 		}
-		return transformer.getTransformedObject(countMap);
 	}
+		return transformer.getTransformedObject(countMap);
+}
+
 
 	private static void registerShutdownHook() {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -688,7 +701,7 @@ public class ElasticSearchUtil {
 					count++;
 					request.add(new DeleteRequest(indexName, documentType, documentId));
 					if (count % BATCH_SIZE == 0 || (count % BATCH_SIZE < BATCH_SIZE && count == identifiers.size())) {
-						BulkResponse bulkResponse = getClient(indexName).bulk(request, RequestOptions.DEFAULT);
+						BulkResponse bulkResponse = getClient(indexName).bulk(request);
 						List<String> failedIds = Arrays.stream(bulkResponse.getItems()).filter(
 								itemResp -> !StringUtils.equals(itemResp.getResponse().getResult().getLowercase(),"deleted")
 						).map(r -> r.getResponse().getId()).collect(Collectors.toList());

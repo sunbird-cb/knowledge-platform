@@ -9,6 +9,7 @@
   },
   "restrictProps": {
     "create" : [
+      "status",
       "status"
     ],
     "update" : [
