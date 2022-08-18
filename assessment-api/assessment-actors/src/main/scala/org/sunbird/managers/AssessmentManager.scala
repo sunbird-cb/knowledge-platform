@@ -12,7 +12,6 @@ import org.sunbird.graph.nodes.DataNode
 import org.sunbird.graph.utils.NodeUtil
 import org.sunbird.telemetry.logger.TelemetryManager
 import org.sunbird.telemetry.util.LogTelemetryEventUtil
-import org.sunbird.utils.RequestUtil
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.collection.JavaConversions._
@@ -28,7 +27,6 @@ object AssessmentManager {
 		val visibility: String = request.getRequest.getOrDefault("visibility", "").asInstanceOf[String]
 		if (StringUtils.isNotBlank(visibility) && StringUtils.equalsIgnoreCase(visibility, "Parent"))
 			throw new ClientException(errCode, "Visibility cannot be Parent!")
-		RequestUtil.restrictProperties(request)
 		DataNode.create(request).map(node => {
 			val response = ResponseHandler.OK
 			response.putAll(Map("identifier" -> node.getIdentifier, "versionKey" -> node.getMetadata.get("versionKey")).asJava)

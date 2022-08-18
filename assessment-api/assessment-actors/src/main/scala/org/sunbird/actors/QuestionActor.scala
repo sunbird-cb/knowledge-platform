@@ -8,7 +8,7 @@ import org.sunbird.common.{DateUtils, Platform}
 import org.sunbird.graph.OntologyEngineContext
 import org.sunbird.graph.nodes.DataNode
 import org.sunbird.graph.utils.NodeUtil
-import org.sunbird.managers.{AssessmentManager, CopyManager}
+import org.sunbird.managers.AssessmentManager
 import org.sunbird.utils.RequestUtil
 
 import java.util
@@ -36,14 +36,13 @@ class QuestionActor @Inject()(implicit oec: OntologyEngineContext) extends BaseA
 		case "systemUpdateQuestion" => systemUpdate(request)
 		case "listQuestions" => listQuestions(request)
 		case "rejectQuestion" => reject(request)
-		case "copyQuestion" => copy(request)
 		case _ => ERROR(request.getOperation)
 	}
 
 	def update(request: Request): Future[Response] = {
 		RequestUtil.restrictProperties(request)
 		request.getRequest.put("identifier", request.getContext.get("identifier"))
-		request.getRequest.put("artifactUrl",null)
+		request.getRequest.put("artifactUrl", null)
 		AssessmentManager.getValidatedNodeForUpdate(request, "ERR_QUESTION_UPDATE").flatMap(_ => AssessmentManager.updateNode(request))
 	}
 
@@ -58,11 +57,8 @@ class QuestionActor @Inject()(implicit oec: OntologyEngineContext) extends BaseA
 	}
 
 	def publish(request: Request): Future[Response] = {
-		val lastPublishedBy: String = request.getRequest.getOrDefault("lastPublishedBy", "").asInstanceOf[String]
 		request.getRequest.put("identifier", request.getContext.get("identifier"))
 		AssessmentManager.getValidatedNodeForPublish(request, "ERR_QUESTION_PUBLISH").map(node => {
-			if(StringUtils.isNotBlank(lastPublishedBy))
-				node.getMetadata.put("lastPublishedBy", lastPublishedBy)
 			AssessmentManager.pushInstructionEvent(node.getIdentifier, node)
 			ResponseHandler.OK.putAll(Map[String, AnyRef]("identifier" -> node.getIdentifier.replace(".img", ""), "message" -> "Question is successfully sent for Publish").asJava)
 		})
@@ -97,14 +93,16 @@ class QuestionActor @Inject()(implicit oec: OntologyEngineContext) extends BaseA
 		val identifier = request.getContext.get("identifier").asInstanceOf[String]
 		RequestUtil.validateRequest(request)
 		val readReq = new Request(request)
-		val identifiers = new util.ArrayList[String](){{
-			add(identifier)
-			if (!identifier.endsWith(".img"))
-				add(identifier.concat(".img"))
-		}}
+		val identifiers = new util.ArrayList[String]() {
+			{
+				add(identifier)
+				if (!identifier.endsWith(".img"))
+					add(identifier.concat(".img"))
+			}
+		}
 		readReq.put("identifiers", identifiers)
 		DataNode.list(readReq).flatMap(response => {
-			DataNode.systemUpdate(request, response,"", None)
+			DataNode.systemUpdate(request, response, "", None)
 		}).map(node => ResponseHandler.OK.put("identifier", identifier).put("status", "success"))
 	}
 
@@ -114,7 +112,7 @@ class QuestionActor @Inject()(implicit oec: OntologyEngineContext) extends BaseA
 		request.getRequest.put("fields", fields)
 		DataNode.search(request).map(nodeList => {
 			val questionList = nodeList.map(node => {
-					NodeUtil.serialize(node, fields, node.getObjectType.toLowerCase.replace("Image", ""), request.getContext.get("version").asInstanceOf[String])
+				NodeUtil.serialize(node, fields, node.getObjectType.toLowerCase.replace("Image", ""), request.getContext.get("version").asInstanceOf[String])
 			}).asJava
 			ResponseHandler.OK.put("questions", questionList).put("count", questionList.size)
 		})
@@ -126,15 +124,10 @@ class QuestionActor @Inject()(implicit oec: OntologyEngineContext) extends BaseA
 			val updateRequest = new Request(request)
 			val date = DateUtils.formatCurrentDate
 			updateRequest.getContext.put("identifier", request.getContext.get("identifier"))
-			if(request.getRequest.containsKey("rejectComment"))
+			if (request.getRequest.containsKey("rejectComment"))
 				updateRequest.put("rejectComment", request.get("rejectComment").asInstanceOf[String])
 			updateRequest.putAll(Map("versionKey" -> node.getMetadata.get("versionKey"), "status" -> "Draft", "prevStatus" -> node.getMetadata.get("status"), "lastStatusChangedOn" -> date, "lastUpdatedOn" -> date).asJava)
 			AssessmentManager.updateNode(updateRequest)
-			})
-		}
-
-	def copy(request: Request): Future[Response] ={
-		RequestUtil.restrictProperties(request)
-		CopyManager.copy(request)
+		})
 	}
 }

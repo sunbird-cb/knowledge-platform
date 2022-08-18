@@ -23,7 +23,6 @@ POST      /question/v4/import                     controllers.v4.QuestionControl
 PATCH     /question/v4/system/update/:identifier  controllers.v4.QuestionController.systemUpdate(identifier:String)
 POST      /question/v4/list                       controllers.v4.QuestionController.list(fields:Option[String])
 POST      /question/v4/reject/:identifier         controllers.v4.QuestionController.reject(identifier:String)
-POST      /question/v4/copy/:identifier           controllers.v4.QuestionController.copy(identifier:String, mode:Option[String])
 
 # QuestionSet API's
 POST      /questionset/v4/create                     controllers.v4.QuestionSetController.create
@@ -40,4 +39,3 @@ GET       /questionset/v4/hierarchy/:identifier      controllers.v4.QuestionSetC
 POST      /questionset/v4/reject/:identifier         controllers.v4.QuestionSetController.reject(identifier:String)
 POST      /questionset/v4/import                     controllers.v4.QuestionSetController.importQuestionSet()
 PATCH     /questionset/v4/system/update/:identifier  controllers.v4.QuestionSetController.systemUpdate(identifier:String)
-POST      /questionset/v4/copy/:identifier           controllers.v4.QuestionSetController.copy(identifier:String, mode:Option[String], type:String?="deep")

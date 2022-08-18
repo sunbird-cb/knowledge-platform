@@ -21,7 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class BaseMimeTypeManager(implicit ss: StorageService) {
 
-	protected val TEMP_FILE_LOCATION: String = Platform.getString("content.upload.temp_location", "/tmp/content")
+	protected val TEMP_FILE_LOCATION= Platform.getString("content.upload.temp_location", "/tmp/content")
 	private val CONTENT_FOLDER = "cloud_storage.content.folder"
 	private val ARTIFACT_FOLDER = "cloud_storage.artifact.folder"
 	private val validator = new UrlValidator()
@@ -51,11 +51,10 @@ class BaseMimeTypeManager(implicit ss: StorageService) {
 			throw new ClientException("ERR_INVALID_NODE", "Please Provide Valid Node!")
 		if (null == data)
 			throw new ClientException("ERR_INVALID_DATA", "Please Provide Valid File Or File Url!")
-		data match {
-			case _: String => validateUrl(data.toString)
-			case file: File => validateFile(file)
-			case _ =>
-		}
+		if (data.isInstanceOf[String])
+			validateUrl(data.toString)
+		else if (data.isInstanceOf[File])
+			validateFile(data.asInstanceOf[File])
 	}
 
 	def validateFile(file: File): Unit = {
@@ -103,7 +102,7 @@ class BaseMimeTypeManager(implicit ss: StorageService) {
 
 	def getFileNameFromURL(fileUrl: String): String = {
 		var fileName = FilenameUtils.getBaseName(fileUrl) + "_" + System.currentTimeMillis
-		if (FilenameUtils.getExtension(fileUrl).nonEmpty) fileName += "." + FilenameUtils.getExtension(fileUrl)
+		if (!FilenameUtils.getExtension(fileUrl).isEmpty) fileName += "." + FilenameUtils.getExtension(fileUrl)
 		fileName
 	}
 
@@ -116,12 +115,10 @@ class BaseMimeTypeManager(implicit ss: StorageService) {
 			val zipFile: ZipFile = new ZipFile(file)
 			try {
 				val entries = checkParams.filter(fileName => null != zipFile.getEntry(fileName))
-				null != entries && entries.nonEmpty
+				null != entries && !entries.isEmpty
 			}
 			catch {
-				case e: Exception =>
-					TelemetryManager.error("Error while verifying zip file: ", e)
-					throw new ClientException("ERR_INVALID_FILE", "Please Provide Valid File!")
+				case e: Exception => throw new ClientException("ERR_INVALID_FILE", "Please Provide Valid File!")
 			} finally {
 				if (null != zipFile) zipFile.close()
 			}
