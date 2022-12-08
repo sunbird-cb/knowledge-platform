@@ -63,6 +63,7 @@ public class SearchProcessor {
 			//If no results when fuzzy was true, return the same.
 			if (exactMatchCount == 0 && !searchDTO.isFuzzySearch()) {
 				searchDTO.setFuzzySearch(true);
+				groupByFinalList = new ArrayList<Map<String, Object>>();
 				query = processSearchQuery(searchDTO, groupByFinalList, true);
 			}
 		}
