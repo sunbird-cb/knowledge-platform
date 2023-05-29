@@ -45,8 +45,10 @@ class SearchController @Inject()(@Named(ActorNames.SEARCH_ACTOR) searchActor: Ac
         var visibility: util.List[String] = null
         internalReq.put(SearchConstants.secureSettings, "true");
         if (visibilityObject != null) {
-            if (visibilityObject.isInstanceOf[util.ArrayList[_]]) visibility = visibilityObject.asInstanceOf[util.ArrayList[String]]
-            else if (visibilityObject.isInstanceOf[String]) visibility = util.Arrays.asList(visibilityObject.asInstanceOf[String])
+            if (visibilityObject.isInstanceOf[util.ArrayList[_]])
+                visibility = visibilityObject.asInstanceOf[util.ArrayList[String]]
+            else if (visibilityObject.isInstanceOf[String])
+                visibility = util.Arrays.asList(visibilityObject.asInstanceOf[String])
         }
         if (visibility.contains("Private")) {
             getErrorResponse(ApiId.APPLICATION_SEARCH, apiVersion, SearchConstants.ERR_ACCESS_DENIED, "Cannot access private content through public search api")
