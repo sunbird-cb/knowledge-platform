@@ -97,7 +97,7 @@ public class SearchActor extends SearchBaseActor {
             Map<String, Object> req = request.getRequest();
             String secureContentFlag = (String) req.get(SearchConstants.secureSettings);
             if ("true".equalsIgnoreCase((String) req.get(SearchConstants.secureSettings)))
-                searchObj.addAdditionalProperty(SearchConstants.secureSettings, secureContentFlag);
+                searchObj.setSecureSettings(true);
             TelemetryManager.log("Search Request: ", req);
             String queryString = (String) req.get(SearchConstants.query);
             int limit = getIntValue(req.get(SearchConstants.limit));
