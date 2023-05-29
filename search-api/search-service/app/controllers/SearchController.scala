@@ -43,7 +43,7 @@ class SearchController @Inject()(@Named(ActorNames.SEARCH_ACTOR) searchActor: Ac
         val filters = internalReq.getRequest.getOrDefault(SearchConstants.filters, new java.util.HashMap()).asInstanceOf[java.util.Map[String, Object]]
         val visibilityObject = filters.getOrDefault("visibility", "")
         var visibility: util.List[String] = null
-        internalReq.put(SearchConstants.searchSecureContent, "true");
+        internalReq.put(SearchConstants.secureSettings, "true");
         if (visibilityObject != null) {
             if (visibilityObject.isInstanceOf[util.ArrayList[_]]) visibility = visibilityObject.asInstanceOf[util.ArrayList[String]]
             else if (visibilityObject.isInstanceOf[String]) visibility = util.Arrays.asList(visibilityObject.asInstanceOf[String])

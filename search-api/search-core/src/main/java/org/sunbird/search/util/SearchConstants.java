@@ -114,6 +114,7 @@ public class SearchConstants {
     public static final String softConstraints = "softConstraints";
     public static final String setDefaultVisibility = "setDefaultVisibility";
     public static String soft = "soft";
-    public static String searchSecureContent = "searchSecureContent";
+    public static String secureSettings = "secureSettings";
+
 
 }
