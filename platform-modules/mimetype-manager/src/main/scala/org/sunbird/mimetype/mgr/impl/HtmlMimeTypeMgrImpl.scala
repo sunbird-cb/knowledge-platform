@@ -24,7 +24,13 @@ class HtmlMimeTypeMgrImpl(implicit ss: StorageService) extends BaseMimeTypeManag
             val urls = uploadArtifactToCloud(uploadFile, objectId, filePath)
             node.getMetadata.put("s3Key", urls(IDX_S3_KEY))
             node.getMetadata.put("artifactUrl", urls(IDX_S3_URL))
-            extractPackageInCloud(objectId, uploadFile, node, "snapshot", false)
+            Future {
+                extractPackageInCloudAsync(objectId, uploadFile, node, "snapshot", false).map(resp =>
+                    TelemetryManager.info("H5P content snapshot folder upload success for " + objectId)
+                ) onFailure { case e: Throwable =>
+                    TelemetryManager.error("H5P content snapshot folder upload failed for " + objectId, e.getCause)
+                }
+            }
             Future(Map[String, AnyRef]("identifier" -> objectId, "artifactUrl" -> urls(IDX_S3_URL), "s3Key" -> urls(IDX_S3_KEY), "size" -> getFileSize(uploadFile).asInstanceOf[AnyRef]))
         } else {
             TelemetryManager.error("ERR_INVALID_FILE" + "Please Provide Valid File! with file name: " + uploadFile.getName)
