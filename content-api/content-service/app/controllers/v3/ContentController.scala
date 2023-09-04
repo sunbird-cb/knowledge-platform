@@ -12,6 +12,7 @@ import utils.{ActorNames, ApiId, JavaJsonUtils}
 import scala.collection.JavaConverters._
 
 import scala.concurrent.{ExecutionContext, Future}
+import org.sunbird.telemetry.logger.TelemetryManager
 
 @Singleton
 class ContentController @Inject()(@Named(ActorNames.CONTENT_ACTOR) contentActor: ActorRef, @Named(ActorNames.COLLECTION_ACTOR) collectionActor: ActorRef, cc: ControllerComponents, actorSystem: ActorSystem)(implicit exec: ExecutionContext) extends BaseController(cc) {
@@ -224,6 +225,7 @@ class ContentController @Inject()(@Named(ActorNames.CONTENT_ACTOR) contentActor:
     }
 
     def upload(identifier: String, fileFormat: Option[String], validation: Option[String]) = Action.async { implicit request =>
+        TelemetryManager.info("**** ContentController::upload... started... ")
         val headers = commonHeaders()
         val content = requestFormData(identifier)
         content.putAll(headers)
