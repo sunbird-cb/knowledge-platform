@@ -21,11 +21,16 @@ class HtmlMimeTypeMgrImpl(implicit ss: StorageService) extends BaseMimeTypeManag
         TelemetryManager.info("Value of indexHtmlValidation: " + indexHtmlValidation)
         val flag: Boolean = if (indexHtmlValidation) isValidPackageStructure(uploadFile, List[String]("index.html")) else true
         if (flag) {
+            TelemetryManager.info("**** HtmlMimeTypeMgrImpl::upload... started... ")
+            var startTime = System.currentTimeMillis()
             val urls = uploadArtifactToCloud(uploadFile, objectId, filePath)
+            TelemetryManager.info("**** HtmlMimeTypeMgrImpl::upload... timeTaken : " + (System.currentTimeMillis() - startTime))
+            startTime = System.currentTimeMillis()
             node.getMetadata.put("s3Key", urls(IDX_S3_KEY))
             node.getMetadata.put("artifactUrl", urls(IDX_S3_URL))
             TelemetryManager.info("***** Calling extractPackageInCloudSync ****")
             Future { extractPackageInCloudAsync(objectId, uploadFile, node, "snapshot", false) }
+            TelemetryManager.info("**** HtmlMimeTypeMgrImpl::upload... timeTaken for extractPackageInCloudAsync **** : " + (System.currentTimeMillis() - startTime))
             TelemetryManager.info("***** constructing return value from upload ****")
             Future(Map[String, AnyRef]("identifier" -> objectId, "artifactUrl" -> urls(IDX_S3_URL), "s3Key" -> urls(IDX_S3_KEY), "size" -> getFileSize(uploadFile).asInstanceOf[AnyRef]))
         } else {
