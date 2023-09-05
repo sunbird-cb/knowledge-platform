@@ -225,7 +225,6 @@ class ContentController @Inject()(@Named(ActorNames.CONTENT_ACTOR) contentActor:
     }
 
     def upload(identifier: String, fileFormat: Option[String], validation: Option[String]) = Action.async { implicit request =>
-        TelemetryManager.info("**** ContentController::upload... started... ")
         val headers = commonHeaders()
         val content = requestFormData(identifier)
         content.putAll(headers)

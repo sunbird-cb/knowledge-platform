@@ -221,10 +221,7 @@ class BaseMimeTypeManager(implicit ss: StorageService) {
 		if(extractableMimeTypes.contains(mimeType)){
 			val extractionBasePath = getBasePath(objectId)
 				extractPackage(file, extractionBasePath)
-				TelemetryManager.info("***** Calling ss.uploadDirectoryAsync ****")
-				var result: Future[List[String]] = ss.uploadDirectoryAsync(getExtractionPath(objectId, node, extractionType, mimeType), new File(extractionBasePath), Option(slugFile))
-				TelemetryManager.info("***** returning from extractPackageInCloudSync ****")
-				result
+				ss.uploadDirectoryAsync(getExtractionPath(objectId, node, extractionType, mimeType), new File(extractionBasePath), Option(slugFile))
 		} else {
 			val emptyFuture: Future[List[String]] = Future.successful(List.empty[String])
 			emptyFuture
