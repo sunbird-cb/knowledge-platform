@@ -12,7 +12,6 @@ import utils.{ActorNames, ApiId, JavaJsonUtils}
 import scala.collection.JavaConverters._
 
 import scala.concurrent.{ExecutionContext, Future}
-import org.sunbird.telemetry.logger.TelemetryManager
 
 @Singleton
 class ContentController @Inject()(@Named(ActorNames.CONTENT_ACTOR) contentActor: ActorRef, @Named(ActorNames.COLLECTION_ACTOR) collectionActor: ActorRef, cc: ControllerComponents, actorSystem: ActorSystem)(implicit exec: ExecutionContext) extends BaseController(cc) {
