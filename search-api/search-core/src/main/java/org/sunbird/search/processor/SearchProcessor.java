@@ -53,6 +53,11 @@ public class SearchProcessor {
 			throws Exception {
 		List<Map<String, Object>> groupByFinalList = new ArrayList<Map<String, Object>>();
 		SearchSourceBuilder query = processSearchQuery(searchDTO, groupByFinalList, true);
+
+		if (searchDTO.isModeratedCoursesAdd()) {
+			query.postFilter(getPostFilterQuery(searchDTO.getUserOrgId()));
+		}
+
 		Future<SearchResponse> searchResponse = null;
 		boolean enableFuzzyWhenNoResults = Platform.config.hasPath("search.fields.enable.fuzzy.when.noresult") &&
 			Platform.config.getBoolean("search.fields.enable.fuzzy.when.noresult");
@@ -328,15 +333,24 @@ public class SearchProcessor {
 		QueryBuilder queryBuilder = null;
 		String totalOperation = searchDTO.getOperation();
 		List<Map> properties = searchDTO.getProperties();
-		if (searchDTO.isSecureSettings() == false)
-			formQuery(properties, queryBuilder, boolQuery, totalOperation, searchDTO.isFuzzySearch());
-		else
+		if (searchDTO.isModeratedCoursesAdd()) {
 			formQueryImpl(properties, queryBuilder, boolQuery, totalOperation, searchDTO.isFuzzySearch(), searchDTO);
-		if (searchDTO.getMultiFilterProperties() != null) {
+		} else {
 			if (searchDTO.isSecureSettings() == false)
-				formQuery(searchDTO.getMultiFilterProperties(), queryBuilder, boolQuery, SearchConstants.SEARCH_OPERATION_OR, searchDTO.isFuzzySearch());
-			else {
+				formQuery(properties, queryBuilder, boolQuery, totalOperation, searchDTO.isFuzzySearch());
+			else
+				formQueryImpl(properties, queryBuilder, boolQuery, totalOperation, searchDTO.isFuzzySearch(), searchDTO);
+		}
+
+		if (searchDTO.getMultiFilterProperties() != null) {
+			if (searchDTO.isModeratedCoursesAdd()) {
 				formQueryImpl(searchDTO.getMultiFilterProperties(), queryBuilder, boolQuery, totalOperation, searchDTO.isFuzzySearch(), searchDTO);
+			} else {
+				if (searchDTO.isSecureSettings() == false)
+					formQuery(searchDTO.getMultiFilterProperties(), queryBuilder, boolQuery, SearchConstants.SEARCH_OPERATION_OR, searchDTO.isFuzzySearch());
+				else {
+					formQueryImpl(searchDTO.getMultiFilterProperties(), queryBuilder, boolQuery, totalOperation, searchDTO.isFuzzySearch(), searchDTO);
+				}
 			}
 		}
 		Map<String, Object> softConstraints = searchDTO.getSoftConstraints();
@@ -354,8 +368,11 @@ public class SearchProcessor {
 
 	private void formQueryImpl(List<Map> properties, QueryBuilder queryBuilder, BoolQueryBuilder boolQuery, String operation, Boolean fuzzy, SearchDTO searchDTO) {
 		boolean enableSecureSettings = false;
-		if (searchDTO != null)
+		boolean isModeratedCoursesAdd = false;
+		if (searchDTO != null) {
 			enableSecureSettings = searchDTO.isSecureSettings();
+			isModeratedCoursesAdd = searchDTO.isModeratedCoursesAdd();
+		}
 		for (Map<String, Object> property : properties) {
 			String opertation = (String) property.get("operation");
 
@@ -376,7 +393,9 @@ public class SearchProcessor {
 				if (enableSecureSettings) {
 					boolQuery.must(getSecureSettingsSearchQuery(searchDTO.getUserOrgId()));
 				} else {
-					boolQuery.mustNot(getSecureSettingsSearchDefaultQuery());
+					if (!isModeratedCoursesAdd) {
+						boolQuery.mustNot(getSecureSettingsSearchDefaultQuery());
+					}
 				}
 				boolQuery.must(queryBuilder);
 				continue;
@@ -469,7 +488,9 @@ public class SearchProcessor {
 				if (enableSecureSettings) {
 					boolQuery.must(getSecureSettingsSearchQuery(searchDTO.getUserOrgId()));
 				} else {
-					boolQuery.mustNot(getSecureSettingsSearchDefaultQuery());
+					if (!isModeratedCoursesAdd) {
+						boolQuery.mustNot(getSecureSettingsSearchDefaultQuery());
+					}
 				}
 				boolQuery.must(queryBuilder);
 			} else {
@@ -881,5 +902,28 @@ public class SearchProcessor {
 		return prepareSearchQuery(searchDTO);
 	}
 
+	private static QueryBuilder getPostFilterQuery(String orgId) {
+		// Creating the post_filter bool query
+		BoolQueryBuilder postFilterBoolQuery = QueryBuilders.boolQuery();
+		// Nested query for "secureSettings"
+		NestedQueryBuilder nestedQuery = QueryBuilders.nestedQuery(
+				"secureSettings",
+				new TermQueryBuilder("secureSettings.organisation", orgId)
+						.boost(1.0f),
+				org.apache.lucene.search.join.ScoreMode.None
+		);
+		postFilterBoolQuery.should(nestedQuery);
+		// Nested query for "secureSettings" with must_not exists
+		BoolQueryBuilder mustNotBoolQuery = QueryBuilders.boolQuery();
+		NestedQueryBuilder nestedMustNotQuery = QueryBuilders.nestedQuery(
+				"secureSettings",
+				new ExistsQueryBuilder("secureSettings.organisation")
+						.boost(1.0f),
+				org.apache.lucene.search.join.ScoreMode.None
+		);
+		mustNotBoolQuery.mustNot(nestedMustNotQuery);
+		postFilterBoolQuery.should(mustNotBoolQuery);
 
+		return postFilterBoolQuery;
+	}
 }
