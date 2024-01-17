@@ -23,7 +23,7 @@ public class SearchDTO {
     private List<Map<String, Object>> aggregations = new ArrayList<>();
     private List<Map> implicitFilterProperties;
     private List<Map> multiFilterProperties;
-    boolean isModeratedCoursesAdd = false;
+    boolean isSecureSettingsDisabled = false;
 
     public SearchDTO() {
         super();
@@ -138,11 +138,11 @@ public class SearchDTO {
         this.multiFilterProperties = multiFilterProperties;
     }
 
-    public boolean isModeratedCoursesAdd() {
-        return isModeratedCoursesAdd;
+    public boolean isSecureSettingsDisabled() {
+        return isSecureSettingsDisabled;
     }
 
-    public void setModeratedCoursesAdd(boolean moderatedCoursesAdd) {
-        isModeratedCoursesAdd = moderatedCoursesAdd;
+    public void setSecureSettingsDisabled(boolean secureSettingsDisabled) {
+        isSecureSettingsDisabled = secureSettingsDisabled;
     }
 }

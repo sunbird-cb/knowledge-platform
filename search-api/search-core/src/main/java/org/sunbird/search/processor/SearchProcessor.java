@@ -54,7 +54,7 @@ public class SearchProcessor {
 		List<Map<String, Object>> groupByFinalList = new ArrayList<Map<String, Object>>();
 		SearchSourceBuilder query = processSearchQuery(searchDTO, groupByFinalList, true);
 
-		if (searchDTO.isModeratedCoursesAdd()) {
+		if (searchDTO.isSecureSettingsDisabled()) {
 			query.postFilter(getPostFilterQuery(searchDTO.getUserOrgId()));
 		}
 
@@ -333,7 +333,7 @@ public class SearchProcessor {
 		QueryBuilder queryBuilder = null;
 		String totalOperation = searchDTO.getOperation();
 		List<Map> properties = searchDTO.getProperties();
-		if (searchDTO.isModeratedCoursesAdd()) {
+		if (searchDTO.isSecureSettingsDisabled()) {
 			formQueryImpl(properties, queryBuilder, boolQuery, totalOperation, searchDTO.isFuzzySearch(), searchDTO);
 		} else {
 			if (searchDTO.isSecureSettings() == false)
@@ -343,7 +343,7 @@ public class SearchProcessor {
 		}
 
 		if (searchDTO.getMultiFilterProperties() != null) {
-			if (searchDTO.isModeratedCoursesAdd()) {
+			if (searchDTO.isSecureSettingsDisabled()) {
 				formQueryImpl(searchDTO.getMultiFilterProperties(), queryBuilder, boolQuery, totalOperation, searchDTO.isFuzzySearch(), searchDTO);
 			} else {
 				if (searchDTO.isSecureSettings() == false)
@@ -368,10 +368,10 @@ public class SearchProcessor {
 
 	private void formQueryImpl(List<Map> properties, QueryBuilder queryBuilder, BoolQueryBuilder boolQuery, String operation, Boolean fuzzy, SearchDTO searchDTO) {
 		boolean enableSecureSettings = false;
-		boolean isModeratedCoursesAdd = false;
+		boolean disableSecureSettings = false;
 		if (searchDTO != null) {
 			enableSecureSettings = searchDTO.isSecureSettings();
-			isModeratedCoursesAdd = searchDTO.isModeratedCoursesAdd();
+			disableSecureSettings = searchDTO.isSecureSettingsDisabled();
 		}
 		for (Map<String, Object> property : properties) {
 			String opertation = (String) property.get("operation");
@@ -393,7 +393,7 @@ public class SearchProcessor {
 				if (enableSecureSettings) {
 					boolQuery.must(getSecureSettingsSearchQuery(searchDTO.getUserOrgId()));
 				} else {
-					if (!isModeratedCoursesAdd) {
+					if (!disableSecureSettings) {
 						boolQuery.mustNot(getSecureSettingsSearchDefaultQuery());
 					}
 				}
@@ -488,7 +488,7 @@ public class SearchProcessor {
 				if (enableSecureSettings) {
 					boolQuery.must(getSecureSettingsSearchQuery(searchDTO.getUserOrgId()));
 				} else {
-					if (!isModeratedCoursesAdd) {
+					if (!disableSecureSettings) {
 						boolQuery.mustNot(getSecureSettingsSearchDefaultQuery());
 					}
 				}
