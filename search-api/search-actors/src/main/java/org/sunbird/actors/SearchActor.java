@@ -100,6 +100,11 @@ public class SearchActor extends SearchBaseActor {
             } else {
                 searchObj.setSecureSettings(false);
             }
+            if (req.get(SearchConstants.isSecureSettingsDisabled) != null) {
+                searchObj.setSecureSettingsDisabled((Boolean) req.get(SearchConstants.isSecureSettingsDisabled));
+            } else {
+                searchObj.setSecureSettingsDisabled(false);
+            }
             searchObj.setUserOrgId((String) request.getContext().get("x-user-channel-id"));
             TelemetryManager.log("Search Request: ", req);
             String queryString = (String) req.get(SearchConstants.query);
