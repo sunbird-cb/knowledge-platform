@@ -130,6 +130,21 @@ public class SearchActor extends SearchBaseActor {
             if (filters.containsKey("relatedBoards"))
                 filters.remove("relatedBoards");
 
+            Map<String, Object> secureSettingsFilter = new HashMap<>();
+            for (String key : filters.keySet()) {
+                if (key.contains("secureSettings") && key.startsWith("secureSettings")) {
+                    secureSettingsFilter.put(key, filters.get(key));
+                }
+            }
+            searchObj.setPostFilter(secureSettingsFilter);
+            if (MapUtils.isEmpty(searchObj.getPostFilter())) {
+                secureSettingsFilter.put("secureSettings.organisation", searchObj.getUserOrgId());
+                searchObj.setPostFilter(secureSettingsFilter);
+            } else {
+                for(String key: searchObj.getPostFilter().keySet()) {
+                    filters.remove(key);
+                }
+            }
             Object objectTypeFromFilter = filters.get(SearchConstants.objectType);
             String objectType = null;
             if (objectTypeFromFilter != null) {
