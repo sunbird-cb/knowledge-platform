@@ -55,7 +55,7 @@ public class SearchProcessor {
 		SearchSourceBuilder query = processSearchQuery(searchDTO, groupByFinalList, true);
 
 		if (searchDTO.isSecureSettingsDisabled()) {
-			query.postFilter(getPostFilterQuery(searchDTO.getUserOrgId()));
+			query.postFilter(getPostFilterQuery(searchDTO.getPostFilter()));
 		}
 
 		Future<SearchResponse> searchResponse = null;
@@ -902,14 +902,24 @@ public class SearchProcessor {
 		return prepareSearchQuery(searchDTO);
 	}
 
-	private static QueryBuilder getPostFilterQuery(String orgId) {
+	private static QueryBuilder getPostFilterQuery(Map<String, Object> postFilter) {
 		// Creating the post_filter bool query
 		BoolQueryBuilder postFilterBoolQuery = QueryBuilders.boolQuery();
-		// Nested query for "secureSettings"
+		BoolQueryBuilder nestedBoolQuery = QueryBuilders.boolQuery();
+
+		for (Map.Entry<String, Object> filters : postFilter.entrySet()) {
+			if (filters.getValue() instanceof List) {
+				for (String value : (List<String>) filters.getValue()) {
+					nestedBoolQuery.should(QueryBuilders.termQuery(filters.getKey(), value));
+				}
+			} else if (filters.getValue() instanceof String) {
+				nestedBoolQuery.should(QueryBuilders.termQuery(filters.getKey(), ((String) filters.getValue()).toLowerCase()));
+			}
+		}
+
 		NestedQueryBuilder nestedQuery = QueryBuilders.nestedQuery(
 				"secureSettings",
-				new TermQueryBuilder("secureSettings.organisation", orgId)
-						.boost(1.0f),
+				nestedBoolQuery,
 				org.apache.lucene.search.join.ScoreMode.None
 		);
 		postFilterBoolQuery.should(nestedQuery);

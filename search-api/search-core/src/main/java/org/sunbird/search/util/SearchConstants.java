@@ -116,4 +116,5 @@ public class SearchConstants {
     public static String soft = "soft";
     public static String secureSettings = "secureSettings";
     public static String isSecureSettingsDisabled = "isSecureSettingsDisabled";
+    public static String secureSettingsOrganisation = "secureSettings.organisation";
 }

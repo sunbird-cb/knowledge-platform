@@ -24,6 +24,7 @@ public class SearchDTO {
     private List<Map> implicitFilterProperties;
     private List<Map> multiFilterProperties;
     boolean isSecureSettingsDisabled = false;
+    private Map<String, Object> postFilter = new HashMap<>();
 
     public SearchDTO() {
         super();
@@ -144,5 +145,13 @@ public class SearchDTO {
 
     public void setSecureSettingsDisabled(boolean secureSettingsDisabled) {
         isSecureSettingsDisabled = secureSettingsDisabled;
+    }
+
+    public Map<String, Object> getPostFilter() {
+        return postFilter;
+    }
+
+    public void setPostFilter(Map<String, Object> postFilter) {
+        this.postFilter = postFilter;
     }
 }
