@@ -132,13 +132,13 @@ public class SearchActor extends SearchBaseActor {
 
             Map<String, Object> secureSettingsFilter = new HashMap<>();
             for (String key : filters.keySet()) {
-                if (key.contains("secureSettings") && key.startsWith("secureSettings")) {
+                if (key.startsWith(SearchConstants.secureSettings)) {
                     secureSettingsFilter.put(key, filters.get(key));
                 }
             }
             searchObj.setPostFilter(secureSettingsFilter);
             if (MapUtils.isEmpty(searchObj.getPostFilter())) {
-                secureSettingsFilter.put("secureSettings.organisation", searchObj.getUserOrgId());
+                secureSettingsFilter.put(SearchConstants.secureSettingsOrganisation, searchObj.getUserOrgId());
                 searchObj.setPostFilter(secureSettingsFilter);
             } else {
                 for(String key: searchObj.getPostFilter().keySet()) {

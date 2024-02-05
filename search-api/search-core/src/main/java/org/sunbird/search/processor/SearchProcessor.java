@@ -914,8 +914,6 @@ public class SearchProcessor {
 				}
 			} else if (filters.getValue() instanceof String) {
 				nestedBoolQuery.should(QueryBuilders.termQuery(filters.getKey(), ((String) filters.getValue()).toLowerCase()));
-			} else {
-				nestedBoolQuery.should(QueryBuilders.termQuery(filters.getKey(), filters.getValue()));
 			}
 		}
 
