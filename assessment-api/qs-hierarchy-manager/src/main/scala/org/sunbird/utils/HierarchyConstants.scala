@@ -63,7 +63,5 @@ object HierarchyConstants {
     val BODY = "body"
     val VALUE = "value"
     val PRIMARY_CATEGORY = "primaryCategory"
-    val MCQ = "Multiple Choice Question"
-
 
 }
