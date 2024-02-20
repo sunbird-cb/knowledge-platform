@@ -88,7 +88,7 @@ object UpdateHierarchyManager {
                     case _ => throw new ClientException("ERR_QS_UPDATE_HIERARCHY", "Error: Missing primary category.")
                 }
 
-                if (primaryCategory == HierarchyConstants.MCQ) {
+                if (primaryCategory == "Multiple Choice Question") {
                     val choices = Option(metadata.get(HierarchyConstants.CHOICES)) match {
                         case Some(choiceMap: java.util.HashMap[_, _]) =>
                             val options = Option(choiceMap.get(HierarchyConstants.OPTIONS)) match {
